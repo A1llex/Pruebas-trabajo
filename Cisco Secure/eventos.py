@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 import json
 import requests
@@ -48,24 +49,21 @@ headers = {
     'Authorization':f"Basic {b64}"
 }
 
-response = requests.get(api_url,params=payload,headers=headers,verify=False)
-
-print(response.url)
-print(response.status_code)
-pp(response.json)
 
 #Excepcion de eventos si no hay respuesta correcta
-if response.status_code != 200:
-    print("Algo salio mal")
-    ("exit")
-
-#Despues filtrar solo los high y critical
+try:
+    #Request
+    response = requests.get(api_url,params=payload,headers=headers,verify=False)
+    response.raise_for_status()
+except requests.exceptions.HTTPError as e:
+    print("Algo salio mal ")
+    raise SystemExit(str(e)) 
 
 #Datos como json
-eventos = response.json
+eventos_data = response.json
 
 #Excepcion si no hay datos 
-if(eventos['metadata']['results']['current_item_count'] < 1):
+if(eventos_data['metadata']['results']['current_item_count'] < 1):
     print("no hay eventos")
 
 #Estructura de datos de salida
@@ -73,7 +71,7 @@ eventos_data = {"Eventos":["Threat Detected","Cloud IOC"],"Severidad":[],"data" 
 
 #Buscar Eventos de severidad High
 ev_High = 0
-for data in eventos['data']:
+for data in eventos_data['data']:
     if data['severity'] == "High" :
         ev_High+=1
         eventos_data['data'].append({
@@ -90,7 +88,7 @@ eventos_data['Severidad'].append({"High":ev_High})
 
 #Buscar Eventos de severidad Critical
 ev_Crit = 0
-for data in eventos['data']:
+for data in eventos_data['data']:
     if data['severity'] == "Critical" :
         ev_Crit +=1
         eventos_data['data'].append({
