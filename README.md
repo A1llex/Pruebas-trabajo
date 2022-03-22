@@ -1,2 +1,2 @@
 # Voseda-Specs
- tareas a realizr para voseda
+ tareas a realizar para voseda
