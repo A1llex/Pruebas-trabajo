@@ -1,4 +1,4 @@
-from ast import If, IfExp
+import pandas as pd
 import json
 import requests
 from requests.auth import HTTPBasicAuth
@@ -19,7 +19,8 @@ threat_Detected_id = 1090519054
 cloud_IOC_id =1107296274
 
 #Busqueda por tipos requeridos en tarea 
-payload = ( ('event_type%5B%5D', f"{threat_Detected_id}") , ('event_type%5B%5D', f"{cloud_IOC_id}"))
+payload = ( ('event_type%5B%5D', f"{threat_Detected_id}") , 
+            ('event_type%5B%5D', f"{cloud_IOC_id}"))
 
 #https://2be0d43ade16fa93ed67:e624dd38-a305-405e-98d8-c615b2831b13@api.amp.cisco.com/v1/events?event_type%5B%5D=1090519054&event_type%5B%5D=1107296274
 api_url = f"https://{client_ID}:{api_Key}@{api_endpoint}/{api_version}/{resource}"
@@ -49,11 +50,13 @@ eventos = response.json
 if(eventos['metadata']['results']['current_item_count'] < 1):
     print("no hay eventos")
 
-eventos_High = {"data" :[]}
-i = 0
+eventos_data = {"Eventos":["Threat Detected","Cloud IOC"],"Severidad":[],"data" :[]}
+
+ev_High = 0
 for data in eventos['data']:
     if data['severity'] == "High" :
-        eventos_High['data'].append({
+        ev_High+=1
+        eventos_data['data'].append({
                             "Hostname" :data['computer']['hostname'],
                             "File name":data['file']['file_name'],
                             "File Path":data['file']['file_path'],                            
@@ -63,11 +66,13 @@ for data in eventos['data']:
                             "Severity":data['severity'],
                             "SHA256": data['file']['identity']['sha256']
                             })
+eventos_data['Severidad'].append({"High":ev_High})
 
-eventos_Critical = {"data" :[]}
+ev_Crit = 0
 for data in eventos['data']:
     if data['severity'] == "Critical" :
-        eventos_Critical['data'].append({
+        ev_Crit +=1
+        eventos_data['data'].append({
                             "Hostname" :data['computer']['hostname'],
                             "File name":data['file']['file_name'],
                             "File Path":data['file']['file_path'],                            
@@ -77,3 +82,14 @@ for data in eventos['data']:
                             "Severity":data['severity'],
                             "SHA256": data['file']['identity']['sha256']
                             })
+eventos_data['Severidad'].append({"Critical":ev_Crit})
+
+print(eventos_data)
+print(len(eventos_data['data']))
+
+
+dataframe = pd.DataFrame(eventos_data['data'])
+dataframe.to_csv('prueba.csv') # relative position
+
+
+
