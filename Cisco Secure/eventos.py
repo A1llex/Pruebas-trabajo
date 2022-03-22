@@ -44,4 +44,36 @@ if response.status_code != 200:
 
 #Despues filtrar solo los high y critical
 
+eventos = response.json
 
+if(eventos['metadata']['results']['current_item_count'] < 1):
+    print("no hay eventos")
+
+eventos_High = {"data" :[]}
+i = 0
+for data in eventos['data']:
+    if data['severity'] == "High" :
+        eventos_High['data'].append({
+                            "Hostname" :data['computer']['hostname'],
+                            "File name":data['file']['file_name'],
+                            "File Path":data['file']['file_path'],                            
+                            "Detection":data['detection'],
+                            "Disposition": data['file']['disposition'],
+                            "Type Event" : data['event_type'],
+                            "Severity":data['severity'],
+                            "SHA256": data['file']['identity']['sha256']
+                            })
+
+eventos_Critical = {"data" :[]}
+for data in eventos['data']:
+    if data['severity'] == "Critical" :
+        eventos_Critical['data'].append({
+                            "Hostname" :data['computer']['hostname'],
+                            "File name":data['file']['file_name'],
+                            "File Path":data['file']['file_path'],                            
+                            "Detection":data['detection'],
+                            "Disposition": data['file']['disposition'],
+                            "Type Event" : data['event_type'],
+                            "Severity":data['severity'],
+                            "SHA256": data['file']['identity']['sha256']
+                            })
