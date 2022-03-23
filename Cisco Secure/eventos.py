@@ -67,44 +67,43 @@ if(eventos_data['metadata']['results']['current_item_count'] < 1):
     print("no hay eventos")
 
 #Estructura de datos de salida
-eventos_data = {"Eventos":["Threat Detected","Cloud IOC"],"Severidad":[],"data" :[]}
+eventos_f = {"Eventos":["Threat Detected","Cloud IOC"],"Severidad":[],"data" :[]}
 
-#Buscar Eventos de severidad High
+#Numero de eventos
 ev_High = 0
+ev_Crit = 0
+#Buscar Eventos de severidad Critical y High
 for data in eventos_data['data']:
     if data['severity'] == "High" :
-        ev_High+=1
-        eventos_data['data'].append({
-                            "Hostname" :data['computer']['hostname'],
-                            "File name":data['file']['file_name'],
-                            "File Path":data['file']['file_path'],                            
-                            "Detection":data['detection'],
-                            "Disposition": data['file']['disposition'],
+        ev_High += 1
+        eventos_f['data'].append({
+                            "Hostname" : data['computer']['hostname'],
+                            "File name": data.get('file',{}).get('file_name',None),
+                            "File Path": data.get('file',{}).get('file_path',None),
+                            "Detection": data.get('detection',None),
+                            "Disposition": data.get('file',{}).get('disposition',None),
                             "Type Event" : data['event_type'],
-                            "Severity":data['severity'],
-                            "SHA256": data['file']['identity']['sha256']
+                            "Severity": data['severity'],
+                            "SHA256": data.get('file',{}).get('identity',{}).get('sha256',None)
                             })
-eventos_data['Severidad'].append({"High":ev_High})
-
-#Buscar Eventos de severidad Critical
-ev_Crit = 0
-for data in eventos_data['data']:
     if data['severity'] == "Critical" :
-        ev_Crit +=1
-        eventos_data['data'].append({
-                            "Hostname" :data['computer']['hostname'],
-                            "File name":data['file']['file_name'],
-                            "File Path":data['file']['file_path'],                            
-                            "Detection":data['detection'],
-                            "Disposition": data['file']['disposition'],
+        ev_Crit += 1
+        eventos_f['data'].append({
+                            "Hostname" : data['computer']['hostname'],
+                            "File name": data.get('file',{}).get('file_name',None),
+                            "File Path": data.get('file',{}).get('file_path',None),
+                            "Detection": data.get('detection',None),
+                            "Disposition": data.get('file',{}).get('disposition',None),
                             "Type Event" : data['event_type'],
-                            "Severity":data['severity'],
-                            "SHA256": data['file']['identity']['sha256']
+                            "Severity": data['severity'],
+                            "SHA256": data.get('file',{}).get('identity',{}).get('sha256',None)
                             })
-eventos_data['Severidad'].append({"Critical":ev_Crit})
+
+eventos_f['Severidad'].append({"High":ev_High})  
+eventos_f['Severidad'].append({"Critical":ev_Crit})
 
 #Guardar los datos requeridos a un archivo csv
-dataframe = pd.DataFrame(eventos_data['data'])
+dataframe = pd.DataFrame(eventos_f['data'])
 dataframe.to_csv('Cisco Secure/prueba.csv') 
 
 #Grafica de eventos a pdf
