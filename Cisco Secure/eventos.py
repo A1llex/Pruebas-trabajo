@@ -35,8 +35,8 @@ threat_Detected_id = 1090519054
 cloud_IOC_id =1107296274
 
 #Busqueda por tipos requeridos en tarea 
-payload = ( ('event_type%5B%5D', f"{threat_Detected_id}") , 
-            ('event_type%5B%5D', f"{cloud_IOC_id}"))
+payload = ( ('event_type[]', f"{threat_Detected_id}") , 
+            ('event_type[]', f"{cloud_IOC_id}"))
 
 #https://2be0d43ade16fa93ed67:e624dd38-a305-405e-98d8-c615b2831b13@api.amp.cisco.com/v1/events?event_type%5B%5D=1090519054&event_type%5B%5D=1107296274
 api_url = f"https://{client_ID}:{api_Key}@{api_endpoint}/{api_version}/{resource}"
@@ -53,14 +53,14 @@ headers = {
 #Excepcion de eventos si no hay respuesta correcta
 try:
     #Request
-    response = requests.get(api_url,params=payload,headers=headers,verify=False)
+    response = requests.get(api_url,params=payload,headers=headers)
     response.raise_for_status()
 except requests.exceptions.HTTPError as e:
     print("Algo salio mal ")
     raise SystemExit(str(e)) 
 
 #Datos como json
-eventos_data = response.json
+eventos_data = response.json()
 
 #Excepcion si no hay datos 
 if(eventos_data['metadata']['results']['current_item_count'] < 1):
